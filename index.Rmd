@@ -1,0 +1,83 @@
+---
+title       : An app for checking the normal approximation to the Binomial distribution
+subtitle    : 
+author      : 
+job         : 
+framework   : io2012        # {io2012, html5slides, shower, dzslides, ...}
+highlighter : highlight.js  # {highlight.js, prettify, highlight}
+hitheme     : tomorrow      # 
+widgets     : [mathjax]     # {mathjax, quiz, bootstrap}
+mode        : selfcontained # {standalone, draft}
+knit        : slidify::knit2slides
+---
+
+## The Aim
+
+In an elementary introductory statistics class the students are told that if X is Binomially distributed, that is, $X \sim B(n,p)$ then the distribution of X can be approximated by the distribution of $Y$, where $Y \sim N(np, np(1-p))$, provided that $np>5$ and $n(1-p)>5$.
+
+A proof of this fact is too complicated for an elementary class. Hence, we would like to at least illustrate this fact by using R.
+
+---
+
+## The procedure
+We sample $100n$ times from the $B(n,p)$ binomial distribution. Then draw the histogram for the sampled observations and fit the probability density function for the normally distributed 
+random variable $Y\sim N(np, np(1-p))$. The better the approximation the better the curve for the normal density function will follow the histogram.
+
+It can be hard to judge whether the probability density function follows the histogram sufficiently well. Hence, we also draw a QQ-plot of the observed quantiles for the sample from the Binomial distribution versus the theoretical quantiles for the $N(np, np(1-p))$ distribution. The closer the Binomial distribution is to the normal distribution $N(np, np(1-p))$ the closer the points will be to the line $y=x$.
+
+---
+
+## Good approximation
+ 
+```{r, echo=FALSE}
+        par(mfrow=c(1,2),bty="n")
+        n <- 50
+        p <- 0.5
+        reps <- 100*n
+        x <- rbinom(reps,n,p)
+        mu <- n*p
+        sigma2 <- n*p*(1-p)
+        sdev <-sqrt(sigma2)
+        Npdf <- dnorm(seq(0,n,0.1),mu,sdev)
+        hist(x,breaks=seq(0,max(x)+1,1)-0.5,prob=T,right=F,main="",xlim=c(0,max(x)),
+             ylim=c(0,max(Npdf)),mgp=c(2,0.5,0),cex=1.0)
+        mtext(side=3,line=1,outer=F,paste("n = ",n,", p = ",p ,sep=""),cex=1.2)
+        
+        lines(seq(0,n,0.1),Npdf,lty=2,col="red")
+        prob <- (1:reps - 0.5)/reps
+        qqx <- qnorm(prob,mu,sdev)
+        qqy <- quantile(x,prob)
+        plot(qqx,qqy,xlab="Normal quantiles",ylab="binomial quantiles",
+             ,mgp=c(2,0.5,0),cex=0.8)
+        mtext(side=3,line=1.5,outer=F,"Normal Q-Q plot",cex=1.0)
+        lines(qqx,qqx,lty=2)
+```
+
+---
+
+
+## Bad approximation
+
+```{r, echo=FALSE}
+par(mfrow=c(1,2),oma=c(0,0,0,0),mar=c(3,3,3,2),bty="n")
+        n <- 50
+        p <- 0.02
+        reps <- 100*n
+        x <- rbinom(reps,n,p)
+        mu <- n*p
+        sigma2 <- n*p*(1-p)
+        sdev <-sqrt(sigma2)
+        Npdf <- dnorm(seq(0,n,0.1),mu,sdev)
+        hist(x,breaks=seq(0,max(x)+1,1)-0.5,prob=T,right=F,main="",xlim=c(0,max(x)),
+             ylim=c(0,max(Npdf)),mgp=c(2,0.5,0),cex=1.0)
+        mtext(side=3,line=1,outer=F,paste("n = ",n,", p = ",p ,sep=""),cex=1.2)
+        
+        lines(seq(0,n,0.1),Npdf,lty=2,col="red")
+        prob <- (1:reps - 0.5)/reps
+        qqx <- qnorm(prob,mu,sdev)
+        qqy <- quantile(x,prob)
+        plot(qqx,qqy,xlab="Normal quantiles",ylab="binomial quantiles",
+             ,mgp=c(2,0.5,0),cex=0.8)
+        mtext(side=3,line=1.5,outer=F,"Normal Q-Q plot",cex=1.0)
+        lines(qqx,qqx,lty=2)
+```
